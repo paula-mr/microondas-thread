@@ -1,3 +1,7 @@
+tp1
+*.o
+.vscode/
+
 # Prerequisites
 *.d
 
