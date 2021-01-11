@@ -13,4 +13,8 @@ class Personagem {
         void esquentarAlgo();
         void comer();
         void voltarATrabalhar();
+
+        Personagem(char* name) {
+            this->name = name;
+        }
 };

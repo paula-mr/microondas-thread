@@ -5,6 +5,8 @@
 
 using namespace std; 
 
+pthread_mutex_t mutex;
+
 void Monitor::esperar(Personagem p) {
     cout << p.name << " quer usar o forno" << endl;
     return;
