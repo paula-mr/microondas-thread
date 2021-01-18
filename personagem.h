@@ -13,6 +13,7 @@ class Personagem {
         void esquentarAlgo();
         void comer();
         void voltarATrabalhar();
+        bool equals(char* name);
 
         Personagem(char* name) {
             this->name = name;

@@ -20,10 +20,13 @@ Monitor forno;
 
 int quantidadeUsoForno;
 
-Personagem personagens[] = {Personagem((char*) "Penny"), Personagem((char*) "Leonard"), 
+/*Personagem personagens[] = {Personagem((char*) "Penny"), Personagem((char*) "Leonard"), 
                             Personagem((char*) "Amy"), Personagem((char*) "Sheldon"),
                             Personagem((char*) "Howard"), Personagem((char*) "Bernadette"),
-                            Personagem((char*) "Kripke"), Personagem((char*) "Stuart")};
+                            Personagem((char*) "Kripke"), Personagem((char*) "Stuart")};*/
+
+Personagem personagens[] = {Personagem((char*) "Leonard"), Personagem((char*) "Howard"), Personagem((char*) "Sheldon"),
+                            };
 
 Personagem encontrarPersonagemPorNome(char* nome) {
     for (Personagem p : personagens) {
@@ -58,7 +61,7 @@ void *startCharacter(void *character) {
         p.voltarATrabalhar();
     }
 
-    return 0;
+    return NULL;
 }
 
 int main(int argc, char **argv) {
@@ -71,11 +74,13 @@ int main(int argc, char **argv) {
 
     for (Personagem p: personagens) {
         p.id = startThread(p.name);
-        sleep(2);
     }
+    
+    sleep(30);
 
     for (Personagem p: personagens) {
         waitForThreadToFinish(p.id);
+        cout << "Thread " << p.name << " terminada" << endl;
     }
 
 

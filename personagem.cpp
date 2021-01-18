@@ -4,6 +4,7 @@
 #include <iostream> 
 #include <stdlib.h> 
 #include <random>
+#include <string.h>
 
 using namespace std; 
 
@@ -23,4 +24,8 @@ void Personagem::comer() {
 void Personagem::voltarATrabalhar() {
     cout << this->name << " voltou para o trabalho" << endl;
     sleep(distr(gen));
+}
+
+bool Personagem::equals(char* name) {
+    return strcmp(this->name, name) == 0;
 }
