@@ -4,14 +4,14 @@
 #include <iostream> 
 #include <set>
 #include <stdlib.h> 
-#include <string.h>
+#include <string>
 
 using namespace std; 
 
-set<const char*> fila;
+set<string> fila;
 
 bool stuartDeveEsperar() {
-    if (fila.size() == 1 && strcmp((*fila.begin()), KRIPKE) == 0) return false;
+    if (fila.size() == 1 && *fila.begin() == KRIPKE) return false;
     return true;
 }
 

@@ -35,10 +35,11 @@ Personagem encontrarPersonagemPorNome(char* name) {
     for (Personagem p : personagens) {
         if (p.equals(name)) return p;
     }
-    return NULL;
+
+    return personagens[0];
 }
 
-pthread_t startThread(char* character) {
+pthread_t startThread(const char* character) {
     pthread_t thread_id;
     if (pthread_create(&thread_id, NULL, startCharacter, (void *) character) < 0) {
         perror("Não foi possível iniciar a thread");
@@ -76,7 +77,7 @@ int main(int argc, char **argv) {
     quantidadeUsoForno = atoi(argv[1]);
 
     for (Personagem p: personagens) {
-        p.id = startThread(p.name);
+        p.id = startThread(p.name.c_str());
         sleep(1);
     }
     

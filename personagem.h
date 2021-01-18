@@ -8,15 +8,15 @@ using namespace std;
 
 class Personagem {
     public:
-        char* name;
+        string name;
         pthread_t id;
 
         void esquentarAlgo();
         void comer();
         void voltarATrabalhar();
-        bool equals(const char* name);
+        bool equals(string name);
 
-        Personagem(char* name) {
+        Personagem(string name) {
             this->name = name;
         }
 };

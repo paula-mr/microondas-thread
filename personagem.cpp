@@ -26,6 +26,6 @@ void Personagem::voltarATrabalhar() {
     sleep(distr(gen));
 }
 
-bool Personagem::equals(const char* name) {
-    return strcmp(this->name, name) == 0;
+bool Personagem::equals(string name) {
+    return this->name == name;
 }
