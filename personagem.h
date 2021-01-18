@@ -2,6 +2,7 @@
 
 #include <string>
 #include <pthread.h>
+#include "constants.h"
 
 using namespace std; 
 
@@ -13,7 +14,7 @@ class Personagem {
         void esquentarAlgo();
         void comer();
         void voltarATrabalhar();
-        bool equals(char* name);
+        bool equals(const char* name);
 
         Personagem(char* name) {
             this->name = name;

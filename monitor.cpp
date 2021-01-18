@@ -1,4 +1,5 @@
 #include "monitor.h"
+#include "constants.h"
 
 #include <iostream> 
 #include <map>
@@ -6,7 +7,7 @@
 
 using namespace std; 
 
-map<char*, Personagem> fila;
+map<const char*, Personagem> fila;
 
 void Monitor::esperar(Personagem p) {
     cout << p.name << " quer usar o forno" << endl;
@@ -14,7 +15,7 @@ void Monitor::esperar(Personagem p) {
 
     pthread_mutex_lock(&this->mutex);
 
-    if ((p.equals("Howard") || p.equals("Bernardette")) && fila.find("Sheldon") != fila.end()) {
+    if ((p.equals(HOWARD) || p.equals(BERNADETTE)) && fila.find(SHELDON) != fila.end()) {
         cout << p.name << " esperando Sheldon terminar de usar o forno" << endl; 
         pthread_cond_wait(&this->sheldonDoesNotWantToUse, &this->mutex);
         cout << "Sheldon liberou o forno para Howard" << endl; 
@@ -24,7 +25,7 @@ void Monitor::esperar(Personagem p) {
 
 void Monitor::liberar(Personagem p) {
     cout << p.name << " vai comer" << endl;
-    if (p.equals("Sheldon")) {
+    if (p.equals(SHELDON)) {
         pthread_cond_signal(&this->sheldonDoesNotWantToUse);
     }
     fila.erase(p.name);

@@ -25,7 +25,7 @@ int quantidadeUsoForno;
                             Personagem((char*) "Howard"), Personagem((char*) "Bernadette"),
                             Personagem((char*) "Kripke"), Personagem((char*) "Stuart")};*/
 
-Personagem personagens[] = {Personagem((char*) "Leonard"), Personagem((char*) "Howard"), Personagem((char*) "Sheldon"),
+Personagem personagens[] = {Personagem((char*) LEONARD), Personagem((char*) HOWARD), Personagem((char*) SHELDON),
                             };
 
 Personagem encontrarPersonagemPorNome(char* nome) {
@@ -74,6 +74,7 @@ int main(int argc, char **argv) {
 
     for (Personagem p: personagens) {
         p.id = startThread(p.name);
+        sleep(1);
     }
     
     sleep(30);

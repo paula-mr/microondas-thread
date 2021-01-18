@@ -1,11 +1,11 @@
 #include "personagem.h"
+#include "constants.h"
 
 #include <unistd.h>
 #include <iostream> 
 #include <stdlib.h> 
 #include <random>
 #include <string.h>
-
 using namespace std; 
 
 random_device rd; 
@@ -14,7 +14,7 @@ uniform_int_distribution<> distr(3, 6);
 
 void Personagem::esquentarAlgo() {
     cout << this->name << " começa a esquentar algo" << endl;
-    sleep(1);
+    sleep(3);
 }
 
 void Personagem::comer() {
@@ -26,6 +26,6 @@ void Personagem::voltarATrabalhar() {
     sleep(distr(gen));
 }
 
-bool Personagem::equals(char* name) {
+bool Personagem::equals(const char* name) {
     return strcmp(this->name, name) == 0;
 }
