@@ -25,12 +25,15 @@ int quantidadeUsoForno;
                             Personagem((char*) "Howard"), Personagem((char*) "Bernadette"),
                             Personagem((char*) "Kripke"), Personagem((char*) "Stuart")};*/
 
-Personagem personagens[] = {Personagem((char*) LEONARD), Personagem((char*) HOWARD), Personagem((char*) SHELDON),
-                            };
+Personagem personagens[] = {Personagem((char*) SHELDON), 
+                            Personagem((char*) KRIPKE), 
+                            Personagem((char*) LEONARD), 
+                            Personagem((char*) STUART),
+                            Personagem((char*) HOWARD),};
 
-Personagem encontrarPersonagemPorNome(char* nome) {
+Personagem encontrarPersonagemPorNome(char* name) {
     for (Personagem p : personagens) {
-        if (p.name == nome) return p;
+        if (p.equals(name)) return p;
     }
     return NULL;
 }
@@ -77,7 +80,7 @@ int main(int argc, char **argv) {
         sleep(1);
     }
     
-    sleep(30);
+    sleep(60);
 
     for (Personagem p: personagens) {
         waitForThreadToFinish(p.id);
