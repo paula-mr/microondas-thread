@@ -3,6 +3,6 @@ Implementar prioridade de casal
 [ ] Se há mais de um casal, vale a mesma prioridade de pessoas sozinhas
 [ ] O primeiro do casal a entrar na fila deve executar primeiro entre os dois
 
-[ ] Validar se inicialização de variáveis de thread foram feitas com sucesso
+[x] Validar se inicialização de variáveis de thread foram feitas com sucesso
 [ ] Implementar Raj (monitor de deadlocks)
-[ ] Corrigir bug do thread.join matando as threads antes de elas finalizarem
+[x] Corrigir bug do thread.join matando as threads antes de elas finalizarem

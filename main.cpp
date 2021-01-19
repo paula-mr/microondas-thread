@@ -8,6 +8,7 @@
 #include <string.h>
 #include <stdlib.h> 
 #include <unistd.h>
+#include <vector>
 
 using namespace std; 
 
@@ -49,8 +50,11 @@ pthread_t startThread(const char* character) {
 }
 
 void waitForThreadToFinish(pthread_t id) {
-     if (pthread_join(id, NULL) < 0) {
+    int ret = pthread_join(id, NULL);
+    if (ret != 0) {
         perror("Erro ao finalizar thread");
+        cout << "\nErro: " << ret << '\n';
+        exit(2);
     }
 }
 
@@ -75,19 +79,18 @@ int main(int argc, char **argv) {
     }
 
     quantidadeUsoForno = atoi(argv[1]);
-
+    vector<pthread_t> t_ids;
     for (Personagem p: personagens) {
-        p.id = startThread(p.name.c_str());
+        pthread_t res = startThread(p.name.c_str());
+        t_ids.push_back(res);
+        p.id = res; // por que isso n funciona ???
         sleep(1);
     }
-    
-    sleep(60);
 
-    for (Personagem p: personagens) {
-        waitForThreadToFinish(p.id);
-        cout << "Thread " << p.name << " terminada" << endl;
+    for (const auto t_id: t_ids) {
+        waitForThreadToFinish(t_id);
+        cout << "Thread terminada" << endl; 
     }
-
 
     return 0;
 }
