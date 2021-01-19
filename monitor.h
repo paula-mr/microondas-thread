@@ -2,6 +2,8 @@
 
 #include "personagem.h"
 
+#include <pthread.h>
+
 class Monitor {
     public:
         pthread_mutex_t mutex;
@@ -12,26 +14,57 @@ class Monitor {
         pthread_cond_t stuartDoesntWantToUse;
 
         Monitor() {
-            pthread_mutex_init(&mutex, NULL);
-            pthread_attr_init(&attr);
-            pthread_cond_init(&sheldonAndAmyDontWantToUse, NULL);
-            pthread_cond_init(&howardAndBernadetteDontWantToUse, NULL);
-            pthread_cond_init(&leonardAndPennyDontWantToUse, NULL);
-            pthread_cond_init(&stuartDoesntWantToUse, NULL);
-            /*TODO 
-            if (pthread_cond_destroy(&cond) != 0) {                                       
-                perror("pthread_cond_destroy() error");                                     
-                exit(2);    
-            }*/                                                                   
+            if (pthread_mutex_init(&mutex, NULL) != 0) {
+                perror("pthread_mutex_init");
+                exit(2);
+            }
+            if (pthread_attr_init(&attr) != 0) {
+                perror("pthread_attr_init()");
+                exit(2);
+            }
+            if (pthread_cond_init(&sheldonAndAmyDontWantToUse, NULL) != 0) {
+                perror("pthread_cond_init() error");
+                exit(2);
+            }
+            if (pthread_cond_init(&howardAndBernadetteDontWantToUse, NULL) != 0) {
+                perror("pthread_cond_init() error");
+                exit(2);
+            }
+            if (pthread_cond_init(&leonardAndPennyDontWantToUse, NULL) != 0) {
+                perror("pthread_cond_init() error");
+                exit(2);
+            }
+            if (pthread_cond_init(&stuartDoesntWantToUse, NULL) != 0) {
+                perror("pthread_cond_init() error");
+                exit(2);
+            }                                                        
         }
 
         ~Monitor() {
-            pthread_attr_destroy(&attr);
-            pthread_mutex_destroy(&mutex);
-            pthread_cond_destroy(&sheldonAndAmyDontWantToUse);
-            pthread_cond_destroy(&howardAndBernadetteDontWantToUse);
-            pthread_cond_destroy(&leonardAndPennyDontWantToUse);
-            pthread_cond_destroy(&stuartDoesntWantToUse);
+            if (pthread_attr_destroy(&attr) != 0) {
+                perror("pthread_attr_destroy() error");
+                exit(2);
+            }
+            if (pthread_mutex_destroy(&mutex) != 0) {
+                perror("pthread_mutex_destroy() error");
+                exit(2);
+            }
+            if (pthread_cond_destroy(&sheldonAndAmyDontWantToUse) != 0) {
+                perror("pthread_cond_destroy() error");
+                exit(2);
+            }
+            if (pthread_cond_destroy(&howardAndBernadetteDontWantToUse) != 0) {
+                perror("pthread_cond_destroy() error");
+                exit(2);
+            }
+            if (pthread_cond_destroy(&leonardAndPennyDontWantToUse) != 0) {
+                perror("pthread_cond_destroy() error");
+                exit(2);
+            }
+            if (pthread_cond_destroy(&stuartDoesntWantToUse) != 0) {
+                perror("pthread_cond_destroy() error");
+                exit(2);
+            }
         }
 
         void esperar(Personagem p);
