@@ -58,97 +58,6 @@ void waitCond(pthread_cond_t* cond, pthread_mutex_t* mutex) {
     }
 }
 
-void Monitor::esperarPorCasalHowardEBernadette() {
-    if (!deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado)) 
-        return;
-
-    if (encontrarPrimeiro(HOWARD, BERNADETTE) == HOWARD) {
-        waitCond(&howardFoiComer, &mutex);
-        if (estaPresente(BERNADETTE) && ultimoExecutado == HOWARD) {
-            waitCond(&bernadetteFoiComer, &mutex);
-        }
-    } else {
-        cout << "esperando por b" << endl;
-        waitCond(&bernadetteFoiComer, &mutex);
-        cout << "b liberou" << endl;
-        if (estaPresente(HOWARD) && ultimoExecutado == BERNADETTE) {
-            cout << "esperando por h" << endl;
-            waitCond(&howardFoiComer, &mutex);
-        }
-    }
-
-}
-
-void Monitor::esperarPorCasalSheldonEAmy() {
-    if (deveExecutarCasal(SHELDON, AMY, ultimoExecutado)) {
-        if (encontrarPrimeiro(SHELDON, AMY) == SHELDON) {
-            waitCond(&sheldonFoiComer, &mutex);
-            if (estaPresente(AMY)) 
-                waitCond(&amyFoiComer, &mutex);
-        } else {
-            waitCond(&amyFoiComer, &mutex);
-            if (estaPresente(SHELDON)) 
-                waitCond(&sheldonFoiComer, &mutex);
-        }
-    }
-}
-
-void Monitor::esperarPorCasalLeonardEPenny() {
-    if (deveExecutarCasal(LEONARD, PENNY, ultimoExecutado)) {
-        if (encontrarPrimeiro(LEONARD, PENNY) == LEONARD) {
-            waitCond(&leonardFoiComer, &mutex);
-            if (estaPresente(PENNY)) 
-                waitCond(&pennyFoiComer, &mutex);
-        } else {
-            waitCond(&pennyFoiComer, &mutex);
-            if (estaPresente(LEONARD)) 
-                waitCond(&leonardFoiComer, &mutex);
-        }
-    }
-}
-
-void Monitor::esperarPorHowardEBernadetteSeparadamente() {
-    if (estaPresente(HOWARD)) {
-        waitCond(&howardFoiComer, &mutex);
-        if (estaPresente(BERNADETTE)) {
-            waitCond(&bernadetteFoiComer, &mutex);
-        }
-    } else if (estaPresente(BERNADETTE)) {
-        waitCond(&bernadetteFoiComer, &mutex);
-        if (estaPresente(HOWARD)) {
-            waitCond(&howardFoiComer, &mutex);
-        }
-    }
-}
-
-void Monitor::esperarPorSheldonEAmySeparadamente() {
-    if (estaPresente(AMY)) {
-        waitCond(&amyFoiComer, &mutex);
-        if (estaPresente(SHELDON)) {
-            waitCond(&sheldonFoiComer, &mutex);
-        }
-    } else if (estaPresente(SHELDON)) {
-        waitCond(&sheldonFoiComer, &mutex);
-        if (estaPresente(AMY)) {
-            waitCond(&amyFoiComer, &mutex);
-        }
-    }
-}
-
-void Monitor::esperarPorLeonardEPennySeparadamente() {
-    if (estaPresente(LEONARD)) {
-        waitCond(&leonardFoiComer, &mutex);
-        if (estaPresente(PENNY)) {
-            waitCond(&pennyFoiComer, &mutex);
-        }
-    } else if (estaPresente(PENNY)) {
-        waitCond(&pennyFoiComer, &mutex);
-        if (estaPresente(LEONARD)) {
-            waitCond(&leonardFoiComer, &mutex);
-        }
-    }
-}
-
 void Monitor::esperar(Personagem p) {
     cout << p.name << " quer usar o forno" << endl;
     lista.insert({p.name, ordem});
@@ -159,83 +68,48 @@ void Monitor::esperar(Personagem p) {
         exit(2);
     }
 
-    // cout << p.name << " has lock" << endl;
+    cout << p.name << " has lock" << endl;
 
-    if (p.equals(LEONARD)) {
-        if (deveExecutarCasal(LEONARD, PENNY, ultimoExecutado)) {
-            if (encontrarPrimeiro(LEONARD, PENNY) == PENNY) {
-                waitCond(&leonardOuPennyDeixouOOutroComer, &mutex);
-            }
-            esperarPorCasalHowardEBernadette();
-        } else {
-            esperarPorHowardEBernadetteSeparadamente();
-            esperarPorCasalSheldonEAmy();
-        }
-    } else if (p.equals(PENNY)) {
-        if (deveExecutarCasal(LEONARD, PENNY, ultimoExecutado)) {
-            if (encontrarPrimeiro(LEONARD, PENNY) == LEONARD) {
-                waitCond(&leonardOuPennyDeixouOOutroComer, &mutex);
-            }
-            esperarPorCasalHowardEBernadette();
-        } else {
-            esperarPorHowardEBernadetteSeparadamente();
-            esperarPorCasalSheldonEAmy();
-        }
-    } else if (p.equals(HOWARD)) {
-        if (deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado)) {
-            if (encontrarPrimeiro(HOWARD, BERNADETTE) == BERNADETTE) {
-                waitCond(&howardOuBernadetteDeixouOOutroComer, &mutex);
-            }
-            esperarPorCasalSheldonEAmy();
-        } else {
-            esperarPorSheldonEAmySeparadamente();
-            esperarPorCasalLeonardEPenny();
+    if (p.equals(HOWARD)) {
+        if (lista.size() > 1 && proximoAExecutar != HOWARD) {
+            waitCond(&howardLiberado, &mutex);
+            proximoAExecutar = "";
         }
     } else if (p.equals(BERNADETTE)) {
-        if (deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado)) {
-            if (encontrarPrimeiro(HOWARD, BERNADETTE) == HOWARD) {
-                waitCond(&howardOuBernadetteDeixouOOutroComer, &mutex);
-            }
-            esperarPorCasalSheldonEAmy();
-        } else {
-            esperarPorSheldonEAmySeparadamente();
-            esperarPorCasalLeonardEPenny();
+        if (lista.size() > 1 && proximoAExecutar != BERNADETTE) {
+            waitCond(&bernadetteLiberada, &mutex);
+            proximoAExecutar = "";
+        }
+    } else if (p.equals(LEONARD)) {
+        if (lista.size() > 1 && proximoAExecutar != LEONARD) {
+            waitCond(&leonardLiberado, &mutex);
+            proximoAExecutar = "";
+        }
+    } else if (p.equals(PENNY)) {
+        if (lista.size() > 1 && proximoAExecutar != PENNY) {
+            waitCond(&pennyLiberada, &mutex);
+            proximoAExecutar = "";
         }
     } else if (p.equals(SHELDON)) {
-        if (deveExecutarCasal(SHELDON, AMY, ultimoExecutado)) {
-            if (encontrarPrimeiro(SHELDON, AMY) == AMY) {
-                waitCond(&sheldonOuAmyDeixouOOutroComer, &mutex);
-            }
-            esperarPorCasalLeonardEPenny();
-        } else {
-            esperarPorLeonardEPennySeparadamente();
-            esperarPorCasalHowardEBernadette();
+        if (lista.size() > 1 && proximoAExecutar != SHELDON) {
+            waitCond(&sheldonLiberado, &mutex);
+            proximoAExecutar = "";
         }
     } else if (p.equals(AMY)) {
-        if (deveExecutarCasal(SHELDON, AMY, ultimoExecutado)) {
-            if (encontrarPrimeiro(SHELDON, AMY) == SHELDON) {
-                waitCond(&sheldonOuAmyDeixouOOutroComer, &mutex);
-            }
-            esperarPorCasalLeonardEPenny();
-        } else {
-            esperarPorLeonardEPennySeparadamente();
-            esperarPorCasalHowardEBernadette();
+        if (lista.size() > 1 && proximoAExecutar != AMY) {
+            waitCond(&amyLiberada, &mutex);
+            proximoAExecutar = "";
         }
     } else if (p.equals(STUART)) {
-        esperarPorCasalHowardEBernadette();
-        esperarPorCasalLeonardEPenny();
-        esperarPorCasalSheldonEAmy();
-        esperarPorHowardEBernadetteSeparadamente();
-        esperarPorLeonardEPennySeparadamente();
-        esperarPorSheldonEAmySeparadamente();
+        if (lista.size() > 1 && proximoAExecutar != STUART) {
+            waitCond(&stuartLiberado, &mutex);
+            proximoAExecutar = "";
+        }
     } else if (p.equals(KRIPKE)) {
-        esperarPorCasalHowardEBernadette();
-        esperarPorCasalLeonardEPenny();
-        esperarPorCasalSheldonEAmy();
-        esperarPorHowardEBernadetteSeparadamente();
-        esperarPorLeonardEPennySeparadamente();
-        esperarPorSheldonEAmySeparadamente();
-        waitCond(&stuartFoiComer, &mutex);
+        if (lista.size() > 1 && proximoAExecutar != KRIPKE) {
+            waitCond(&kripkeLiberado, &mutex);
+            proximoAExecutar = "";
+        }
     }
   
 }
@@ -247,30 +121,79 @@ void Monitor::liberar(Personagem p) {
     lista.erase(p.name);
     pthread_mutex_unlock(&this->mutex);
 
-    if (p.equals(SHELDON) || p.equals(AMY)) {
-        if (deveExecutarCasal(SHELDON, AMY, ultimoExecutado)) {
-            condSignal(&sheldonOuAmyDeixouOOutroComer);
+    if (deveExecutarCasal(SHELDON, AMY, ultimoExecutado) && !deveExecutarCasal(LEONARD, PENNY, ultimoExecutado)) {
+        cout << "CASAL S A" << endl;
+        if (encontrarPrimeiro(SHELDON, AMY) == SHELDON) {
+            proximoAExecutar = SHELDON;
+            condSignal(&sheldonLiberado);
         } else {
-            pthread_cond_t* quemFoiComer = p.equals(SHELDON) ? &sheldonFoiComer : &amyFoiComer;
-            condSignal(quemFoiComer);
+            proximoAExecutar = AMY;
+            condSignal(&amyLiberada);
         }
-    } else if (p.equals(LEONARD) || p.equals(PENNY)) {
-        if (deveExecutarCasal(LEONARD, PENNY, ultimoExecutado)) {
-            condSignal(&leonardOuPennyDeixouOOutroComer);
+    } else if (deveExecutarCasal(LEONARD, PENNY, ultimoExecutado) && !deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado)) {
+        cout << "CASAL L P" << endl;
+        if (encontrarPrimeiro(LEONARD, PENNY) == LEONARD) {
+            proximoAExecutar = LEONARD;
+            condSignal(&leonardLiberado);
         } else {
-            pthread_cond_t* quemFoiComer = p.equals(LEONARD) ? &leonardFoiComer : &pennyFoiComer;
-            condSignal(quemFoiComer);
+            proximoAExecutar = PENNY;
+            condSignal(&pennyLiberada);
         }
-    } else if (p.equals(HOWARD) || p.equals(BERNADETTE)) {
-        if (deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado)) {
-            condSignal(&howardOuBernadetteDeixouOOutroComer);
+    } else if (deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado) && !deveExecutarCasal(SHELDON, AMY, ultimoExecutado)) {
+        cout << "CASAL H B" << endl;
+        if (encontrarPrimeiro(HOWARD, BERNADETTE) == HOWARD) {
+            cout << "Sig h" << endl;
+            proximoAExecutar = HOWARD;
+            condSignal(&howardLiberado);
         } else {
-            pthread_cond_t* quemFoiComer = p.equals(HOWARD) ? &howardFoiComer : &bernadetteFoiComer;
-            condSignal(quemFoiComer);
+            cout << "Sig b" << endl;
+            proximoAExecutar = BERNADETTE;
+            condSignal(&bernadetteLiberada);
         }
-    } else if (p.equals(STUART)) {
-        condSignal(&stuartFoiComer);
+    } else if ((estaPresente(SHELDON) || estaPresente(AMY)) 
+        && (!estaPresente(LEONARD) && !estaPresente(PENNY))) {
+        cout << "S o A" << endl;
+        if (encontrarPrimeiro(SHELDON, AMY) == SHELDON) {
+            proximoAExecutar = SHELDON;
+            condSignal(&sheldonLiberado);
+        } else {
+            proximoAExecutar = AMY;
+            condSignal(&amyLiberada);
+        }
+    } else if ((estaPresente(HOWARD) || estaPresente(BERNADETTE)) 
+        && (!estaPresente(SHELDON) && !estaPresente(AMY))) {
+        cout << "H o B" << endl;
+        if (encontrarPrimeiro(HOWARD, BERNADETTE) == HOWARD) {
+            proximoAExecutar = HOWARD;
+            condSignal(&howardLiberado);
+        } else {
+            proximoAExecutar = BERNADETTE;
+            condSignal(&bernadetteLiberada);
+        }
+    } else if ((estaPresente(LEONARD) || estaPresente(PENNY)) 
+        && (!estaPresente(HOWARD) && !estaPresente(BERNADETTE))) {
+        cout << "L o P" << endl;
+        if (encontrarPrimeiro(LEONARD, PENNY) == LEONARD) {
+            proximoAExecutar = LEONARD;
+            condSignal(&leonardLiberado);
+        } else {
+            proximoAExecutar = PENNY;
+            condSignal(&pennyLiberada);
+        }
+    } else if (!estaPresente(LEONARD) && !estaPresente(PENNY) &&
+                !estaPresente(HOWARD) && !estaPresente(BERNADETTE) &&
+                !estaPresente(SHELDON) && !estaPresente(AMY)) {
+        if (estaPresente(STUART)) {
+            cout << "Stu" << endl;
+            proximoAExecutar = STUART;
+            condSignal(&stuartLiberado);
+        } else {
+            cout << "K" << endl;
+            proximoAExecutar = KRIPKE;
+            condSignal(&kripkeLiberado);
+        }
     }
+
 }
 
 void Monitor::verificar() {
