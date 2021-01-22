@@ -32,13 +32,16 @@ bool casalCompleto(string casal1, string casal2) {
     return lista.find(casal1) != lista.end() && lista.find(casal2) != lista.end();
 }
 
-bool nenhumMembroDoCasal(string casal1, string casal2) {
+bool nenhumMembroDoCasal(const string casal1, const string casal2) {
     return lista.find(casal1) == lista.end() && lista.find(casal2) == lista.end();
 }
 
-bool deveExecutarCasal(string c1, string c2, string ultimoExecutado) {
-    return (casalCompleto(c1, c2) || ((estaPresente(c1) && ultimoExecutado == c2) ||
-        (estaPresente(c2) && ultimoExecutado == c1)));
+bool deveExecutarCasal(const string c1, const string c2, string ultimoExecutado) {
+    bool umFilaOutroAcabouDeSerExecutado = ((estaPresente(c1) && ultimoExecutado == c2) ||
+        (estaPresente(c2) && ultimoExecutado == c1));
+    bool ambosNaFila = casalCompleto(c1, c2);
+
+    return ambosNaFila || umFilaOutroAcabouDeSerExecutado;
 }
 
 void condSignal(pthread_cond_t* cond) {
@@ -56,22 +59,24 @@ void waitCond(pthread_cond_t* cond, pthread_mutex_t* mutex) {
 }
 
 void Monitor::esperarPorCasalHowardEBernadette() {
-    if (deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado)) {
-        if (encontrarPrimeiro(HOWARD, BERNADETTE) == HOWARD) {
-            waitCond(&howardFoiComer, &mutex);
-            if (estaPresente(BERNADETTE) && ultimoExecutado == HOWARD) {
-                waitCond(&bernadetteFoiComer, &mutex);
-            }
-        } else {
-            cout << "esperando por b" << endl;
+    if (!deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado)) 
+        return;
+
+    if (encontrarPrimeiro(HOWARD, BERNADETTE) == HOWARD) {
+        waitCond(&howardFoiComer, &mutex);
+        if (estaPresente(BERNADETTE) && ultimoExecutado == HOWARD) {
             waitCond(&bernadetteFoiComer, &mutex);
-            cout << "b liberou" << endl;
-            if (estaPresente(HOWARD) && ultimoExecutado == BERNADETTE) {
-                cout << "esperando por h" << endl;
-                waitCond(&howardFoiComer, &mutex);
-            }
+        }
+    } else {
+        cout << "esperando por b" << endl;
+        waitCond(&bernadetteFoiComer, &mutex);
+        cout << "b liberou" << endl;
+        if (estaPresente(HOWARD) && ultimoExecutado == BERNADETTE) {
+            cout << "esperando por h" << endl;
+            waitCond(&howardFoiComer, &mutex);
         }
     }
+
 }
 
 void Monitor::esperarPorCasalSheldonEAmy() {
@@ -242,41 +247,26 @@ void Monitor::liberar(Personagem p) {
     lista.erase(p.name);
     pthread_mutex_unlock(&this->mutex);
 
-    if (p.equals(SHELDON)) {
+    if (p.equals(SHELDON) || p.equals(AMY)) {
         if (deveExecutarCasal(SHELDON, AMY, ultimoExecutado)) {
             condSignal(&sheldonOuAmyDeixouOOutroComer);
         } else {
-            condSignal(&sheldonFoiComer);
+            pthread_cond_t* quemFoiComer = p.equals(SHELDON) ? &sheldonFoiComer : &amyFoiComer;
+            condSignal(quemFoiComer);
         }
-    } else if (p.equals(AMY)) {
-        if (deveExecutarCasal(SHELDON, AMY, ultimoExecutado)) {
-            condSignal(&sheldonOuAmyDeixouOOutroComer);
-        } else {
-            condSignal(&amyFoiComer);
-        }
-    } else if (p.equals(LEONARD)) {
+    } else if (p.equals(LEONARD) || p.equals(PENNY)) {
         if (deveExecutarCasal(LEONARD, PENNY, ultimoExecutado)) {
             condSignal(&leonardOuPennyDeixouOOutroComer);
         } else {
-            condSignal(&leonardFoiComer);
+            pthread_cond_t* quemFoiComer = p.equals(LEONARD) ? &leonardFoiComer : &pennyFoiComer;
+            condSignal(quemFoiComer);
         }
-    } else if (p.equals(PENNY)) {
-        if (deveExecutarCasal(LEONARD, PENNY, ultimoExecutado)) {
-            condSignal(&leonardOuPennyDeixouOOutroComer);
-        } else {
-            condSignal(&pennyFoiComer);
-        }
-    } else if (p.equals(HOWARD)) {
+    } else if (p.equals(HOWARD) || p.equals(BERNADETTE)) {
         if (deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado)) {
             condSignal(&howardOuBernadetteDeixouOOutroComer);
         } else {
-            condSignal(&howardFoiComer);
-        }
-    } else if (p.equals(BERNADETTE)) {
-        if (deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado)) {
-            condSignal(&howardOuBernadetteDeixouOOutroComer);
-        } else {
-            condSignal(&bernadetteFoiComer);
+            pthread_cond_t* quemFoiComer = p.equals(HOWARD) ? &howardFoiComer : &bernadetteFoiComer;
+            condSignal(quemFoiComer);
         }
     } else if (p.equals(STUART)) {
         condSignal(&stuartFoiComer);
