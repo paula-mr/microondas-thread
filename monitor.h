@@ -35,6 +35,10 @@ class Monitor {
         pthread_cond_t stuartFoiComer;
         pthread_cond_t kripkeFoiComer;
 
+        pthread_cond_t sheldonOuAmyDeixouOOutroComer;
+        pthread_cond_t howardOuBernadetteDeixouOOutroComer;
+        pthread_cond_t leonardOuPennyDeixouOOutroComer;
+
         Monitor() {
             if (pthread_mutex_init(&mutex, NULL) != 0) {
                 perror("pthread_mutex_init");
@@ -51,7 +55,10 @@ class Monitor {
             initCond(&leonardFoiComer);
             initCond(&pennyFoiComer);
             initCond(&stuartFoiComer);  
-            initCond(&kripkeFoiComer);        
+            initCond(&kripkeFoiComer);   
+            initCond(&sheldonOuAmyDeixouOOutroComer);
+            initCond(&howardOuBernadetteDeixouOOutroComer);  
+            initCond(&leonardOuPennyDeixouOOutroComer);          
             ordem = 0;                                   
         }
 
@@ -72,6 +79,9 @@ class Monitor {
             destroyCond(&pennyFoiComer);
             destroyCond(&stuartFoiComer);  
             destroyCond(&kripkeFoiComer);   
+            destroyCond(&sheldonOuAmyDeixouOOutroComer);
+            destroyCond(&howardOuBernadetteDeixouOOutroComer);  
+            destroyCond(&leonardOuPennyDeixouOOutroComer);       
         }
 
         void esperar(Personagem p);
