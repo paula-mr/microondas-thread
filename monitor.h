@@ -5,6 +5,21 @@
 #include <pthread.h>
 
 class Monitor {
+    private:
+        void initCond(pthread_cond_t* cond) {
+            if (pthread_cond_init(cond, NULL) != 0) {
+                perror("pthread_cond_init() error");
+                exit(2);
+            }
+        }
+
+        void destroyCond(pthread_cond_t* cond) {
+            if (pthread_cond_destroy(cond) != 0) {
+                perror("pthread_cond_destroy() error");
+                exit(2);
+            }
+        }
+
     public:
         pthread_mutex_t mutex;
         pthread_attr_t attr;
@@ -12,6 +27,14 @@ class Monitor {
         pthread_cond_t howardAndBernadetteDontWantToUse;
         pthread_cond_t leonardAndPennyDontWantToUse;
         pthread_cond_t stuartDoesntWantToUse;
+
+        pthread_cond_t sheldonAndAmyAreNotTogether;
+        pthread_cond_t howardAndBernadetteAreNotTogether;
+        pthread_cond_t leonardAndPennyAreNotTogether;
+
+        bool casalSheldonEAmyAtivo;
+        bool casalLeonardEPennyAtivo;
+        bool casalHowardEBernadetteAtivo;
 
         Monitor() {
             if (pthread_mutex_init(&mutex, NULL) != 0) {
@@ -22,22 +45,17 @@ class Monitor {
                 perror("pthread_attr_init()");
                 exit(2);
             }
-            if (pthread_cond_init(&sheldonAndAmyDontWantToUse, NULL) != 0) {
-                perror("pthread_cond_init() error");
-                exit(2);
-            }
-            if (pthread_cond_init(&howardAndBernadetteDontWantToUse, NULL) != 0) {
-                perror("pthread_cond_init() error");
-                exit(2);
-            }
-            if (pthread_cond_init(&leonardAndPennyDontWantToUse, NULL) != 0) {
-                perror("pthread_cond_init() error");
-                exit(2);
-            }
-            if (pthread_cond_init(&stuartDoesntWantToUse, NULL) != 0) {
-                perror("pthread_cond_init() error");
-                exit(2);
-            }                                                        
+            initCond(&sheldonAndAmyDontWantToUse);
+            initCond(&howardAndBernadetteDontWantToUse);
+            initCond(&leonardAndPennyDontWantToUse);
+            initCond(&stuartDoesntWantToUse);    
+            initCond(&sheldonAndAmyAreNotTogether);
+            initCond(&howardAndBernadetteAreNotTogether);
+            initCond(&leonardAndPennyAreNotTogether);     
+
+            casalSheldonEAmyAtivo = false;
+            casalLeonardEPennyAtivo = false;
+            casalHowardEBernadetteAtivo = false;                                        
         }
 
         ~Monitor() {
@@ -49,27 +67,22 @@ class Monitor {
                 perror("pthread_mutex_destroy() error");
                 exit(2);
             }
-            if (pthread_cond_destroy(&sheldonAndAmyDontWantToUse) != 0) {
-                perror("pthread_cond_destroy() error");
-                exit(2);
-            }
-            if (pthread_cond_destroy(&howardAndBernadetteDontWantToUse) != 0) {
-                perror("pthread_cond_destroy() error");
-                exit(2);
-            }
-            if (pthread_cond_destroy(&leonardAndPennyDontWantToUse) != 0) {
-                perror("pthread_cond_destroy() error");
-                exit(2);
-            }
-            if (pthread_cond_destroy(&stuartDoesntWantToUse) != 0) {
-                perror("pthread_cond_destroy() error");
-                exit(2);
-            }
+            destroyCond(&sheldonAndAmyDontWantToUse);
+            destroyCond(&howardAndBernadetteDontWantToUse);
+            destroyCond(&leonardAndPennyDontWantToUse);
+            destroyCond(&stuartDoesntWantToUse);
+            destroyCond(&sheldonAndAmyAreNotTogether);
+            destroyCond(&howardAndBernadetteAreNotTogether);
+            destroyCond(&leonardAndPennyAreNotTogether); 
         }
 
         void esperar(Personagem p);
         void liberar(Personagem p);
         void verificar();
+
+        void esperarPorSheldonOuAmy();
+        void esperarPorHowardOuBernadette();
+        void esperarPorLeonardOuPenny();
 
         void esperarPorSheldonEAmy();
         void esperarPorHowardEBernadette();

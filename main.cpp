@@ -21,16 +21,15 @@ Monitor forno;
 
 int quantidadeUsoForno;
 
-/*Personagem personagens[] = {Personagem((char*) "Penny"), Personagem((char*) "Leonard"), 
-                            Personagem((char*) "Amy"), Personagem((char*) "Sheldon"),
-                            Personagem((char*) "Howard"), Personagem((char*) "Bernadette"),
-                            Personagem((char*) "Kripke"), Personagem((char*) "Stuart")};*/
+Personagem personagens[] = {Personagem((char*) "Sheldon"),
+                            Personagem((char*) "Howard"),
+                            Personagem((char*) "Penny"), 
+                            Personagem((char*) "Leonard"), 
+                            Personagem((char*) "Amy"), 
+                            Personagem((char*) "Bernadette"),
+                            Personagem((char*) "Kripke"), 
+                            Personagem((char*) "Stuart")};
 
-Personagem personagens[] = {Personagem((char*) SHELDON), 
-                            Personagem((char*) KRIPKE), 
-                            Personagem((char*) LEONARD), 
-                            Personagem((char*) STUART),
-                            Personagem((char*) HOWARD),};
 
 Personagem encontrarPersonagemPorNome(char* name) {
     for (Personagem p : personagens) {
