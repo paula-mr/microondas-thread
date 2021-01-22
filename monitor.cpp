@@ -2,24 +2,37 @@
 #include "constants.h"
 
 #include <iostream> 
-#include <set>
+#include <map>
 #include <stdlib.h> 
 #include <string>
 
 using namespace std; 
 
-set<string> fila;
+map<string, int> lista;
 
-bool stuartDeveEsperar() {
-    return fila.size() != 1 || *fila.begin() != KRIPKE;
+
+bool estaPresente(string personagem) {
+    return lista.find(personagem) != lista.end();
+}
+
+string encontrarPrimeiro(string p1, string p2) {
+    for (auto i: lista) {
+        cout << "LISTA " << i.first << endl;
+        if (i.first == p1) {
+            return p1;
+        } else if (i.first == p2){
+            return p2;
+        }
+    }
+    return "";
 }
 
 bool casalCompleto(string casal1, string casal2) {
-    return fila.find(casal1) != fila.end() && fila.find(casal2) != fila.end();
+    return lista.find(casal1) != lista.end() && lista.find(casal2) != lista.end();
 }
 
 bool nenhumMembroDoCasal(string casal1, string casal2) {
-    return fila.find(casal1) == fila.end() && fila.find(casal2) == fila.end();
+    return lista.find(casal1) == lista.end() && lista.find(casal2) == lista.end();
 }
 
 void signalCond(pthread_cond_t* cond) {
@@ -29,9 +42,17 @@ void signalCond(pthread_cond_t* cond) {
     }
 }
 
+void waitCond(pthread_cond_t* cond, pthread_mutex_t* mutex) {
+    if (pthread_cond_wait(cond, mutex) != 0) {
+        perror("pthread_cond_wait() error");
+        exit(2);
+    }
+}
+
 void Monitor::esperar(Personagem p) {
     cout << p.name << " quer usar o forno" << endl;
-    fila.insert(p.name);
+    lista.insert({p.name, ordem});
+    ordem++;
 
     if (pthread_mutex_lock(&this->mutex) != 0) {
         perror("pthread_mutex_lock error");
@@ -40,161 +61,96 @@ void Monitor::esperar(Personagem p) {
 
     cout << p.name << " has lock" << endl;
 
-    if (p.equals(HOWARD) || p.equals(BERNADETTE)) {
-        esperarPorSheldonEAmy();
-        casalHowardEBernadetteAtivo = casalCompleto(HOWARD, BERNADETTE);
-        if (!casalHowardEBernadetteAtivo) { 
-            esperarPorLeonardEPenny();
-            esperarPorSheldonOuAmy(); 
-        }
-    } else if (p.equals(LEONARD) || p.equals(PENNY)) {
-        esperarPorHowardEBernadette();
-        casalLeonardEPennyAtivo = casalCompleto(LEONARD, PENNY);
-        if (!casalLeonardEPennyAtivo) {
-            esperarPorSheldonEAmy(); 
-            esperarPorHowardOuBernadette(); 
-        }
-    } else if (p.equals(SHELDON) || p.equals(AMY)) {
-        esperarPorLeonardEPenny();
-        casalSheldonEAmyAtivo = casalCompleto(SHELDON, AMY);
-        if (!casalSheldonEAmyAtivo) {
-            esperarPorHowardEBernadette(); 
-            esperarPorLeonardOuPenny(); 
-        }
+    if (p.equals(HOWARD)) {
+        if (lista.size() > 1) waitCond(&howardLiberado, &mutex);
+    } else if (p.equals(BERNADETTE)) {
+        if (lista.size() > 1) waitCond(&bernadetteLiberada, &mutex);
+    } else if (p.equals(LEONARD)) {
+        if (lista.size() > 1) waitCond(&leonardLiberado, &mutex);
+    } else if (p.equals(PENNY)) {
+        if (lista.size() > 1) waitCond(&pennyLiberada, &mutex);
+    } else if (p.equals(SHELDON)) {
+        if (lista.size() > 1) waitCond(&sheldonLiberado, &mutex);
+    } else if (p.equals(AMY)) {
+        if (lista.size() > 1) waitCond(&amyLiberada, &mutex);
     } else if (p.equals(STUART)) {
-        esperarPorSheldonEAmy(); 
-        esperarPorHowardEBernadette();
-        esperarPorLeonardEPenny();
-
-        esperarPorSheldonOuAmy(); 
-        esperarPorHowardOuBernadette();
-        esperarPorLeonardOuPenny();
+        if (lista.size() > 1) waitCond(&stuartLiberado, &mutex);
     } else if (p.equals(KRIPKE)) {
-        esperarPorSheldonEAmy(); 
-        esperarPorHowardEBernadette();
-        esperarPorLeonardEPenny();
-
-        esperarPorSheldonOuAmy(); 
-        esperarPorHowardOuBernadette();
-        esperarPorLeonardOuPenny();
-        esperarPorStuart();
+        if (lista.size() > 1) waitCond(&kripkeLiberado, &mutex);
     }
 }
 
-void Monitor::esperarPorSheldonEAmy() {
-    if (casalSheldonEAmyAtivo) {
-        cout << "Esperando Sheldon e Amy terminarem de usar o forno" << endl; 
-        if (pthread_cond_wait(&this->sheldonAndAmyAreNotTogether, &this->mutex) != 0) {
-            perror("pthread_cond_wait() error");
-            exit(2);
-        }
-        cout << "Sheldon e Amy liberaram o forno para uso" << endl;
-    }
-}
-
-void Monitor::esperarPorHowardEBernadette() {
-    if (casalHowardEBernadetteAtivo) {
-        cout << "Esperando Howard e Bernadette terminarem de usar o forno" << endl; 
-        if (pthread_cond_wait(&this->howardAndBernadetteAreNotTogether, &this->mutex) != 0) {
-            perror("pthread_cond_wait() error");
-            exit(2);
-        }
-        cout << "Howard e Bernadette liberaram o forno para uso" << endl;
-    }
-}
-
-void Monitor::esperarPorLeonardEPenny() {
-    if (casalLeonardEPennyAtivo) {
-        cout << "Esperando Leonard e Penny terminarem de usar o forno" << endl; 
-        if (pthread_cond_wait(&this->leonardAndPennyAreNotTogether, &this->mutex) != 0) {
-            perror("pthread_cond_wait() error");
-            exit(2);
-        }
-        cout << "Leonard e Penny liberaram o forno para uso" << endl;
-    }
-}
-
-void Monitor::esperarPorSheldonOuAmy() {
-    if (fila.find(SHELDON) != fila.end() || fila.find(AMY) != fila.end()) {
-        cout << "Esperando Sheldon terminar de usar o forno" << endl; 
-        if (pthread_cond_wait(&this->sheldonAndAmyDontWantToUse, &this->mutex) != 0) {
-            perror("pthread_cond_wait() error");
-            exit(2);
-        }
-        cout << "Sheldon liberou o forno para uso" << endl;
-    }
-}
-
-void Monitor::esperarPorHowardOuBernadette() {
-    if (fila.find(HOWARD) != fila.end() || fila.find(BERNADETTE) != fila.end()) {
-        cout << "Esperando Howard terminar de usar o forno" << endl; 
-        if (pthread_cond_wait(&this->howardAndBernadetteDontWantToUse, &this->mutex) != 0) {
-            perror("pthread_cond_wait() error");
-            exit(2);
-        }
-        cout << "Howard liberou o forno para uso" << endl; 
-    }
-}
-
-void Monitor::esperarPorLeonardOuPenny() {
-    if (fila.find(LEONARD) != fila.end() || fila.find(PENNY) != fila.end()) {
-        cout << "Esperando Leonard terminar de usar o forno" << endl; 
-        if (pthread_cond_wait(&this->leonardAndPennyDontWantToUse, &this->mutex) != 0) {
-            perror("pthread_cond_wait() error");
-            exit(2);
-        }
-        cout << "Leonard liberou o forno para uso" << endl;
-    }
-}
-
-void Monitor::esperarPorStuart() {
-    if (fila.find(STUART) != fila.end()) {
-        cout << "Esperando Stuart terminar de usar o forno" << endl; 
-        if (pthread_cond_wait(&this->stuartDoesntWantToUse, &this->mutex) != 0) {
-            perror("pthread_cond_wait() error");
-            exit(2);
-        }
-        cout << "Stuart liberou o forno para uso" << endl;
-    }
+bool deveriaExecutarCasal(string c1, string c2, string ultimoExecutado) {
+    return (casalCompleto(SHELDON, AMY) || ((estaPresente(c1) || estaPresente(c2)) &&
+        (ultimoExecutado == c1 || ultimoExecutado == c2)));
 }
 
 void Monitor::liberar(Personagem p) {
     cout << p.name << " vai comer" << endl;
 
-    fila.erase(p.name);
+    lista.erase(p.name);
     pthread_mutex_unlock(&this->mutex);
 
-    if (p.equals(SHELDON)) {
-        
+    if (deveriaExecutarCasal(SHELDON, AMY, p.name) && !casalCompleto(LEONARD, PENNY)) {
+        cout << "CASAL S A" << endl;
+        if (encontrarPrimeiro(SHELDON, AMY) == SHELDON) {
+            signalCond(&sheldonLiberado);
+        } else {
+            signalCond(&amyLiberada);
+        }
+    } else if (deveriaExecutarCasal(LEONARD, PENNY, p.name) && !casalCompleto(HOWARD, BERNADETTE)) {
+        cout << "CASAL L P" << endl;
+        if (encontrarPrimeiro(LEONARD, PENNY) == LEONARD) {
+            signalCond(&leonardLiberado);
+        } else {
+            signalCond(&pennyLiberada);
+        }
+    } else if (deveriaExecutarCasal(HOWARD, BERNADETTE, p.name) && !casalCompleto(SHELDON, AMY)) {
+        cout << "CASAL H B" << endl;
+        if (encontrarPrimeiro(HOWARD, BERNADETTE) == HOWARD) {
+            cout << "Sig h" << endl;
+            signalCond(&howardLiberado);
+        } else {
+            cout << "Sig b" << endl;
+            signalCond(&bernadetteLiberada);
+        }
+    } else if ((estaPresente(SHELDON) || estaPresente(AMY)) 
+        && (!estaPresente(LEONARD) && !estaPresente(PENNY))) {
+        cout << "S o A" << endl;
+        if (encontrarPrimeiro(SHELDON, AMY) == SHELDON) {
+            signalCond(&sheldonLiberado);
+        } else {
+            signalCond(&amyLiberada);
+        }
+    } else if ((estaPresente(HOWARD) || estaPresente(BERNADETTE)) 
+        && (!estaPresente(SHELDON) && !estaPresente(AMY))) {
+        cout << "H o B" << endl;
+        if (encontrarPrimeiro(HOWARD, BERNADETTE) == HOWARD) {
+            signalCond(&howardLiberado);
+        } else {
+            signalCond(&bernadetteLiberada);
+        }
+    } else if ((estaPresente(LEONARD) || estaPresente(PENNY)) 
+        && (!estaPresente(HOWARD) && !estaPresente(BERNADETTE))) {
+        cout << "L o P" << endl;
+        if (encontrarPrimeiro(LEONARD, PENNY) == LEONARD) {
+            signalCond(&leonardLiberado);
+        } else {
+            signalCond(&pennyLiberada);
+        }
+    } else if (!estaPresente(LEONARD) && !estaPresente(PENNY) &&
+                !estaPresente(HOWARD) && !estaPresente(BERNADETTE) &&
+                !estaPresente(SHELDON) && !estaPresente(AMY)) {
+        cout << "Stu" << endl;
+        signalCond(&stuartLiberado);
+    } else if (!estaPresente(LEONARD) && !estaPresente(PENNY) &&
+                !estaPresente(HOWARD) && !estaPresente(BERNADETTE) &&
+                !estaPresente(SHELDON) && !estaPresente(AMY)
+                && !estaPresente(STUART)) {
+        cout << "K" << endl;
+        signalCond(&kripkeLiberado);
     }
 
-    if (p.equals(SHELDON) || p.equals(AMY)) {
-        signalCond(&this->sheldonAndAmyDontWantToUse);
-        if (casalCompleto(SHELDON, AMY)) {
-            signalCond(&this->sheldonAndAmyAreNotTogether);
-        }
-        if (nenhumMembroDoCasal(SHELDON, AMY)) {
-            casalSheldonEAmyAtivo = false;
-        }
-    } else if (p.equals(HOWARD) || p.equals(BERNADETTE)) {
-        signalCond(&this->howardAndBernadetteDontWantToUse);
-        if (casalCompleto(HOWARD, BERNADETTE)) {
-            signalCond(&this->howardAndBernadetteAreNotTogether);
-        }
-        if (nenhumMembroDoCasal(HOWARD, BERNADETTE)) {
-            casalHowardEBernadetteAtivo = false;
-        }
-    } else if (p.equals(LEONARD) || p.equals(PENNY)) {
-        signalCond(&this->leonardAndPennyDontWantToUse);
-        if (casalCompleto(LEONARD, PENNY)) {
-            signalCond(&this->leonardAndPennyAreNotTogether);
-        }
-        if (nenhumMembroDoCasal(LEONARD, PENNY)) {
-            casalLeonardEPennyAtivo = false;
-        }
-    } else if (p.equals(STUART)) {
-        signalCond(&this->stuartDoesntWantToUse);
-    }
 }
 
 void Monitor::verificar() {

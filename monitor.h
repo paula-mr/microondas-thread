@@ -21,20 +21,18 @@ class Monitor {
         }
 
     public:
+        int ordem;
         pthread_mutex_t mutex;
         pthread_attr_t attr;
-        pthread_cond_t sheldonAndAmyDontWantToUse;
-        pthread_cond_t howardAndBernadetteDontWantToUse;
-        pthread_cond_t leonardAndPennyDontWantToUse;
-        pthread_cond_t stuartDoesntWantToUse;
 
-        pthread_cond_t sheldonAndAmyAreNotTogether;
-        pthread_cond_t howardAndBernadetteAreNotTogether;
-        pthread_cond_t leonardAndPennyAreNotTogether;
-
-        bool casalSheldonEAmyAtivo;
-        bool casalLeonardEPennyAtivo;
-        bool casalHowardEBernadetteAtivo;
+        pthread_cond_t sheldonLiberado;
+        pthread_cond_t amyLiberada;
+        pthread_cond_t howardLiberado;
+        pthread_cond_t bernadetteLiberada;
+        pthread_cond_t leonardLiberado;
+        pthread_cond_t pennyLiberada;
+        pthread_cond_t stuartLiberado;
+        pthread_cond_t kripkeLiberado;
 
         Monitor() {
             if (pthread_mutex_init(&mutex, NULL) != 0) {
@@ -45,17 +43,15 @@ class Monitor {
                 perror("pthread_attr_init()");
                 exit(2);
             }
-            initCond(&sheldonAndAmyDontWantToUse);
-            initCond(&howardAndBernadetteDontWantToUse);
-            initCond(&leonardAndPennyDontWantToUse);
-            initCond(&stuartDoesntWantToUse);    
-            initCond(&sheldonAndAmyAreNotTogether);
-            initCond(&howardAndBernadetteAreNotTogether);
-            initCond(&leonardAndPennyAreNotTogether);     
-
-            casalSheldonEAmyAtivo = false;
-            casalLeonardEPennyAtivo = false;
-            casalHowardEBernadetteAtivo = false;                                        
+            initCond(&sheldonLiberado);
+            initCond(&amyLiberada);
+            initCond(&howardLiberado);
+            initCond(&bernadetteLiberada);    
+            initCond(&leonardLiberado);
+            initCond(&pennyLiberada);
+            initCond(&stuartLiberado);  
+            initCond(&kripkeLiberado);        
+            ordem = 0;                                   
         }
 
         ~Monitor() {
@@ -67,25 +63,17 @@ class Monitor {
                 perror("pthread_mutex_destroy() error");
                 exit(2);
             }
-            destroyCond(&sheldonAndAmyDontWantToUse);
-            destroyCond(&howardAndBernadetteDontWantToUse);
-            destroyCond(&leonardAndPennyDontWantToUse);
-            destroyCond(&stuartDoesntWantToUse);
-            destroyCond(&sheldonAndAmyAreNotTogether);
-            destroyCond(&howardAndBernadetteAreNotTogether);
-            destroyCond(&leonardAndPennyAreNotTogether); 
+            destroyCond(&sheldonLiberado);
+            destroyCond(&amyLiberada);
+            destroyCond(&howardLiberado);
+            destroyCond(&bernadetteLiberada);    
+            destroyCond(&leonardLiberado);
+            destroyCond(&pennyLiberada);
+            destroyCond(&stuartLiberado);  
+            destroyCond(&kripkeLiberado);   
         }
 
         void esperar(Personagem p);
         void liberar(Personagem p);
         void verificar();
-
-        void esperarPorSheldonOuAmy();
-        void esperarPorHowardOuBernadette();
-        void esperarPorLeonardOuPenny();
-
-        void esperarPorSheldonEAmy();
-        void esperarPorHowardEBernadette();
-        void esperarPorLeonardEPenny();
-        void esperarPorStuart();
 };
