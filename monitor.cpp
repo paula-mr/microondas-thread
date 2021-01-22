@@ -163,9 +163,8 @@ void Monitor::esperar(Personagem p) {
             }
             esperarPorCasalHowardEBernadette();
         } else {
-            esperarPorCasalHowardEBernadette();
-            esperarPorCasalSheldonEAmy();
             esperarPorHowardEBernadetteSeparadamente();
+            esperarPorCasalSheldonEAmy();
         }
     } else if (p.equals(PENNY)) {
         if (deveExecutarCasal(LEONARD, PENNY, ultimoExecutado)) {
@@ -174,9 +173,8 @@ void Monitor::esperar(Personagem p) {
             }
             esperarPorCasalHowardEBernadette();
         } else {
-            esperarPorCasalSheldonEAmy();
-            esperarPorCasalHowardEBernadette();
             esperarPorHowardEBernadetteSeparadamente();
+            esperarPorCasalSheldonEAmy();
         }
     } else if (p.equals(HOWARD)) {
         if (deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado)) {
@@ -185,9 +183,8 @@ void Monitor::esperar(Personagem p) {
             }
             esperarPorCasalSheldonEAmy();
         } else {
-            esperarPorCasalLeonardEPenny();
-            esperarPorCasalSheldonEAmy();
             esperarPorSheldonEAmySeparadamente();
+            esperarPorCasalLeonardEPenny();
         }
     } else if (p.equals(BERNADETTE)) {
         if (deveExecutarCasal(HOWARD, BERNADETTE, ultimoExecutado)) {
@@ -196,9 +193,8 @@ void Monitor::esperar(Personagem p) {
             }
             esperarPorCasalSheldonEAmy();
         } else {
-            esperarPorCasalLeonardEPenny();
-            esperarPorCasalSheldonEAmy();
             esperarPorSheldonEAmySeparadamente();
+            esperarPorCasalLeonardEPenny();
         }
     } else if (p.equals(SHELDON)) {
         if (deveExecutarCasal(SHELDON, AMY, ultimoExecutado)) {
@@ -207,9 +203,8 @@ void Monitor::esperar(Personagem p) {
             }
             esperarPorCasalLeonardEPenny();
         } else {
-            esperarPorCasalHowardEBernadette();
-            esperarPorCasalLeonardEPenny();
             esperarPorLeonardEPennySeparadamente();
+            esperarPorCasalHowardEBernadette();
         }
     } else if (p.equals(AMY)) {
         if (deveExecutarCasal(SHELDON, AMY, ultimoExecutado)) {
@@ -218,13 +213,8 @@ void Monitor::esperar(Personagem p) {
             }
             esperarPorCasalLeonardEPenny();
         } else {
-            cout << "A esperando H B" << endl;
-            esperarPorCasalHowardEBernadette();
-            cout << "A esperando L P" << endl;
-            esperarPorCasalLeonardEPenny();
-            cout << "A esperando L e / P" << endl;
             esperarPorLeonardEPennySeparadamente();
-            cout << "A TERMINOU DE ESPERAR L e / P" << endl;
+            esperarPorCasalHowardEBernadette();
         }
     } else if (p.equals(STUART)) {
         esperarPorCasalHowardEBernadette();
