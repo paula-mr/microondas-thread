@@ -3,6 +3,7 @@
 #include "personagem.h"
 
 #include <pthread.h>
+#include <map>
 
 class Monitor {
     private:
@@ -24,6 +25,8 @@ class Monitor {
         int ordem;
         string ultimoExecutado;
         string proximoAExecutar;
+        map<string, int> lista;
+
         pthread_mutex_t mutex;
         pthread_attr_t attr;
 
@@ -78,4 +81,9 @@ class Monitor {
         void esperar(Personagem p);
         void liberar(Personagem p);
         void verificar();
+
+        bool estaPresente(string personagem);
+        string encontrarPrimeiro(string p1, string p2);
+        bool deveExecutarCasal(const string c1, const string c2);
+        bool casalCompleto(string p1, string p2);
 };

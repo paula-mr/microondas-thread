@@ -88,7 +88,6 @@ int main(int argc, char **argv) {
 
     for (const auto t_id: t_ids) {
         waitForThreadToFinish(t_id);
-        cout << "Thread terminada" << endl; 
     }
 
     return 0;
