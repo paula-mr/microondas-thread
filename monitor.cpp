@@ -54,7 +54,9 @@ void Monitor::liberar(Personagem p) {
 }
 
 void Monitor::verificar() {
-
+    if (!deadlock) return;
+    // TODO: desfazer deadlock
+    deadlock = false; 
 }
 
 string Monitor::definirProximoAExecutar() {

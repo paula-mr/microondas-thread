@@ -53,7 +53,13 @@ void *iniciarPersonagem(void *nome) {
     return NULL;
 }
 
-
+void *run_raj(void* flag) {
+    bool should_run_raj = ((bool*) flag);
+    while (should_run_raj) {
+        sleep(5);
+        forno.verificar();
+    }
+}
 
 int main(int argc, char **argv) {
     if (argc < 2) {
@@ -62,6 +68,14 @@ int main(int argc, char **argv) {
     }
 
     quantidadeUsoForno = atoi(argv[1]);
+    
+    pthread_t raj;
+    bool should_run_raj = true;
+
+    if (pthread_create(&raj, NULL, run_raj, &should_run_raj) < 0) {
+        perror("Não foi possível iniciar a thread");
+    }
+    
     vector<pthread_t> t_ids;
     for (Personagem p: personagens) {
         pthread_t res = iniciarThread(p.nome.c_str());
@@ -72,6 +86,8 @@ int main(int argc, char **argv) {
     for (const auto t_id: t_ids) {
         esperarThreadTerminar(t_id);
     }
+
+    should_run_raj = false;
 
     return 0;
 }
