@@ -18,6 +18,7 @@ void esperarThreadTerminar(pthread_t id);
 
 
 Monitor forno;
+bool should_run_raj = true;
 
 int quantidadeUsoForno;
 
@@ -55,10 +56,12 @@ void *iniciarPersonagem(void *nome) {
 
 void *run_raj(void* flag) {
     bool should_run_raj = ((bool*) flag);
+    cout << "should_run_raj=" << (should_run_raj ? "true" : "false") << '\n';
     while (should_run_raj) {
         sleep(5);
         forno.verificar();
     }
+    return NULL;
 }
 
 int main(int argc, char **argv) {
@@ -70,7 +73,6 @@ int main(int argc, char **argv) {
     quantidadeUsoForno = atoi(argv[1]);
     
     pthread_t raj;
-    bool should_run_raj = true;
 
     if (pthread_create(&raj, NULL, run_raj, &should_run_raj) < 0) {
         perror("Não foi possível iniciar a thread");

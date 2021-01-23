@@ -4,6 +4,8 @@
 #include <iostream> 
 #include <stdlib.h> 
 #include <string>
+#include <random>
+#include <iterator>
 
 using namespace std; 
 
@@ -54,9 +56,20 @@ void Monitor::liberar(Personagem p) {
 }
 
 void Monitor::verificar() {
-    if (!deadlock) return;
-    // TODO: desfazer deadlock
-    deadlock = false; 
+    // random_device rd; 
+    // mt19937 gen(rd()); 
+    if (!deadlock || lista.size() == 0) return;
+    cout<< "verificou demais\n";
+
+    // uniform_int_distribution<> distr(0, lista.size() - 1);
+    // auto it = lista.begin();
+    // advance(it, distr(gen) + 1);
+    // string p = it->first;
+    // cout << "Raj detectou um deadlock, liberando " << p << endl;
+    // liberarPersonagem(p);
+    
+    // deadlock = false; 
+    
 }
 
 string Monitor::definirProximoAExecutar() {
@@ -110,7 +123,7 @@ string Monitor::definirProximoAExecutar() {
                 estaPresente(STUART)) {
         return STUART;
     } else {
-        cout << "DEADLOCK" << endl;
+        // cout << "DEADLOCK" << endl;
         return "";
     }
 
