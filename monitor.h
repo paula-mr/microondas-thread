@@ -28,6 +28,7 @@ class Monitor {
         map<string, int> lista;
 
         pthread_mutex_t mutex;
+        pthread_mutex_t mutexLista;
         pthread_attr_t attr;
 
         pthread_cond_t sheldonLiberado;
@@ -42,6 +43,10 @@ class Monitor {
         Monitor() {
             if (pthread_mutex_init(&mutex, NULL) != 0) {
                 perror("pthread_mutex_init");
+                exit(2);
+            }
+            if (pthread_mutex_init(&mutexLista, NULL) != 0) {
+                perror("pthread_mutexLista_init");
                 exit(2);
             }
             if (pthread_attr_init(&attr) != 0) {
@@ -66,6 +71,10 @@ class Monitor {
                 exit(2);
             }
             if (pthread_mutex_destroy(&mutex) != 0) {
+                perror("pthread_mutex_destroy() error");
+                exit(2);
+            }
+            if (pthread_mutex_destroy(&mutexLista) != 0) {
                 perror("pthread_mutex_destroy() error");
                 exit(2);
             }

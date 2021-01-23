@@ -37,7 +37,9 @@ bool Monitor::hasDeadLock() {
 
 void Monitor::esperar(Personagem p) {
     cout << p.nome << " quer usar o forno" << endl;
+    pthread_mutex_lock(&mutexLista);
     lista.insert({p.nome, ordem++});
+    pthread_mutex_unlock(&mutexLista);
 
     if (pthread_mutex_lock(&mutex) != 0) {
         perror("pthread_mutex_lock error");
@@ -53,7 +55,10 @@ void Monitor::liberar(Personagem p) {
     cout << p.nome << " vai comer" << endl;
     ultimoExecutado = p.nome;
 
+    pthread_mutex_lock(&mutexLista);
     lista.erase(p.nome);
+    pthread_mutex_unlock(&mutexLista);
+
     pthread_mutex_unlock(&this->mutex);
 
     proximoAExecutar = definirProximoAExecutar();
