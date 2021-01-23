@@ -12,43 +12,25 @@
 
 using namespace std; 
 
-void *startCharacter(void *character);
-pthread_t startThread(char* character);
-void waitForThreadToFinish(pthread_t id);
+void *iniciarPersonagem(void *character);
+pthread_t iniciarThread(char* character);
+void esperarThreadTerminar(pthread_t id);
 
 
 Monitor forno;
 
 int quantidadeUsoForno;
 
-Personagem personagens[] = {Personagem((char*) "Sheldon"),
-                            Personagem((char*) "Howard"),
-                            Personagem((char*) "Penny"), 
-                            Personagem((char*) "Leonard"), 
-                            Personagem((char*) "Amy"), 
-                            Personagem((char*) "Bernadette"),
-                            Personagem((char*) "Kripke"), 
-                            Personagem((char*) "Stuart")};
-
-
-Personagem encontrarPersonagemPorNome(char* name) {
-    for (Personagem p : personagens) {
-        if (p.equals(name)) return p;
-    }
-
-    return personagens[0];
-}
-
-pthread_t startThread(const char* character) {
+pthread_t iniciarThread(const char* personagem) {
     pthread_t thread_id;
-    if (pthread_create(&thread_id, NULL, startCharacter, (void *) character) < 0) {
+    if (pthread_create(&thread_id, NULL, iniciarPersonagem, (void *) personagem) < 0) {
         perror("Não foi possível iniciar a thread");
     }
     
     return thread_id;
 }
 
-void waitForThreadToFinish(pthread_t id) {
+void esperarThreadTerminar(pthread_t id) {
     int ret = pthread_join(id, NULL);
     if (ret != 0) {
         perror("Erro ao finalizar thread");
@@ -57,8 +39,8 @@ void waitForThreadToFinish(pthread_t id) {
     }
 }
 
-void *startCharacter(void *character) {
-    Personagem p = encontrarPersonagemPorNome((char *) character);
+void *iniciarPersonagem(void *nome) {
+    Personagem p = encontrarPersonagemPorNome((char *) nome);
 
     for (int i=0; i < quantidadeUsoForno; i++) {
         forno.esperar(p);
@@ -71,6 +53,8 @@ void *startCharacter(void *character) {
     return NULL;
 }
 
+
+
 int main(int argc, char **argv) {
     if (argc < 2) {
         cout << "Necessário passar a quantidade de vezes que um personagem deseja comer." << endl;
@@ -80,14 +64,13 @@ int main(int argc, char **argv) {
     quantidadeUsoForno = atoi(argv[1]);
     vector<pthread_t> t_ids;
     for (Personagem p: personagens) {
-        pthread_t res = startThread(p.name.c_str());
+        pthread_t res = iniciarThread(p.nome.c_str());
         t_ids.push_back(res);
-        p.id = res; // por que isso n funciona ???
         sleep(1);
     }
 
     for (const auto t_id: t_ids) {
-        waitForThreadToFinish(t_id);
+        esperarThreadTerminar(t_id);
     }
 
     return 0;

@@ -56,7 +56,7 @@ class Monitor {
             initCond(&pennyLiberada);
             initCond(&stuartLiberado);  
             initCond(&kripkeLiberado);        
-            ordem = 0;                                    
+            ordem = 0;                                
         }
 
         ~Monitor() {
@@ -86,4 +86,7 @@ class Monitor {
         string encontrarPrimeiro(string p1, string p2);
         bool deveExecutarCasal(const string c1, const string c2);
         bool casalCompleto(string p1, string p2);
+        void liberarPersonagem(string nome);
+        void esperarPorVez(string nome);
+        string definirProximoAExecutar();
 };

@@ -12,8 +12,12 @@ random_device rd;
 mt19937 gen(rd()); 
 uniform_int_distribution<> distr(3, 6);
 
+bool Personagem::deveEsperar(string proximoAExecutar, int tamanhoFila) {
+    return tamanhoFila > 1 && proximoAExecutar != nome;
+}
+
 void Personagem::esquentarAlgo() {
-    cout << this->name << " começa a esquentar algo" << endl;
+    cout << this->nome << " começa a esquentar algo" << endl;
     sleep(3);
 }
 
@@ -22,10 +26,18 @@ void Personagem::comer() {
 }
 
 void Personagem::voltarATrabalhar() {
-    cout << this->name << " voltou para o trabalho" << endl;
+    cout << this->nome << " voltou para o trabalho" << endl;
     sleep(distr(gen));
 }
 
-bool Personagem::equals(string name) {
-    return this->name == name;
+bool Personagem::equals(string nome) {
+    return this->nome == nome;
+}
+
+Personagem encontrarPersonagemPorNome(const char* nome) {
+    for (Personagem p : personagens) {
+        if (p.equals(nome)) return p;
+    }
+
+    return personagens[0];
 }
