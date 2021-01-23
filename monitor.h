@@ -23,7 +23,6 @@ class Monitor {
 
     public:
         int ordem;
-        bool deadlock;
         string ultimoExecutado;
         string proximoAExecutar;
         map<string, int> lista;
@@ -59,7 +58,6 @@ class Monitor {
             initCond(&kripkeLiberado);        
 
             ordem = 0;                  
-            deadlock = false;              
         }
 
         ~Monitor() {
@@ -92,4 +90,5 @@ class Monitor {
         void liberarPersonagem(string nome);
         void esperarPorVez(string nome);
         string definirProximoAExecutar();
+        bool hasDeadLock();
 };

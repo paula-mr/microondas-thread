@@ -23,6 +23,18 @@ void condSignal(pthread_cond_t* cond) {
     }
 }
 
+bool Monitor::hasDeadLock() {
+    bool hasDeadLockCasais = casalCompleto(LEONARD, PENNY) 
+                        && casalCompleto(HOWARD, BERNADETTE)
+                        && casalCompleto(SHELDON, AMY);
+
+    bool hasDeadLockIndividual = ((estaPresente(LEONARD) || estaPresente(PENNY)) && !casalCompleto(LEONARD, PENNY)
+                                && (estaPresente(HOWARD) || estaPresente(BERNADETTE)) && !casalCompleto(HOWARD, BERNADETTE)
+                                && (estaPresente(SHELDON) || estaPresente(AMY)) && !casalCompleto(SHELDON, AMY));
+
+    return hasDeadLockCasais || hasDeadLockIndividual;
+}
+
 void Monitor::esperar(Personagem p) {
     cout << p.nome << " quer usar o forno" << endl;
     lista.insert({p.nome, ordem++});
@@ -34,7 +46,6 @@ void Monitor::esperar(Personagem p) {
 
     if (p.deveEsperar(proximoAExecutar, lista.size())) {
         esperarPorVez(p.nome);
-        deadlock = true;
     }
 }
 
@@ -49,27 +60,23 @@ void Monitor::liberar(Personagem p) {
 
     if (proximoAExecutar != "") {
         liberarPersonagem(proximoAExecutar);
-    } else {
-        deadlock = true;
     }
 
 }
 
 void Monitor::verificar() {
-    // random_device rd; 
-    // mt19937 gen(rd()); 
-    if (!deadlock || lista.size() == 0) return;
+    random_device rd; 
+    mt19937 gen(rd()); 
+
+    if (!hasDeadLock() || lista.size() == 0) return;
     cout<< "verificou demais\n";
 
-    // uniform_int_distribution<> distr(0, lista.size() - 1);
-    // auto it = lista.begin();
-    // advance(it, distr(gen) + 1);
-    // string p = it->first;
-    // cout << "Raj detectou um deadlock, liberando " << p << endl;
-    // liberarPersonagem(p);
-    
-    // deadlock = false; 
-    
+    uniform_int_distribution<> distr(0, lista.size() - 1);
+    auto it = lista.begin();
+    advance(it, distr(gen) + 1);
+    string p = it->first;
+    cout << "Raj detectou um deadlock, liberando " << p << endl;
+    liberarPersonagem(p);    
 }
 
 string Monitor::definirProximoAExecutar() {
