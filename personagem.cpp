@@ -18,7 +18,7 @@ bool Personagem::deveEsperar(string proximoAExecutar, int tamanhoFila) {
 
 void Personagem::esquentarAlgo() {
     cout << this->nome << " começa a esquentar algo" << endl;
-    sleep(3);
+    sleep(1);
 }
 
 void Personagem::comer() {

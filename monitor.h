@@ -23,6 +23,7 @@ class Monitor {
 
     public:
         int ordem;
+        bool deadlock;
         string ultimoExecutado;
         string proximoAExecutar;
         map<string, int> lista;
@@ -56,7 +57,9 @@ class Monitor {
             initCond(&pennyLiberada);
             initCond(&stuartLiberado);  
             initCond(&kripkeLiberado);        
-            ordem = 0;                                
+
+            ordem = 0;                  
+            deadlock = false;              
         }
 
         ~Monitor() {

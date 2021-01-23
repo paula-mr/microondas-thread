@@ -30,7 +30,10 @@ void Monitor::esperar(Personagem p) {
         exit(2);
     }
 
-    if (p.deveEsperar(proximoAExecutar, lista.size())) esperarPorVez(p.nome);
+    if (p.deveEsperar(proximoAExecutar, lista.size())) {
+        esperarPorVez(p.nome);
+        deadlock = true;
+    }
 }
 
 void Monitor::liberar(Personagem p) {
@@ -44,6 +47,8 @@ void Monitor::liberar(Personagem p) {
 
     if (proximoAExecutar != "") {
         liberarPersonagem(proximoAExecutar);
+    } else {
+        deadlock = true;
     }
 
 }
