@@ -13,14 +13,43 @@
 using namespace std; 
 
 void *iniciarPersonagem(void *character);
-pthread_t iniciarThread(char* character);
+pthread_t iniciarThread(const char* character);
 void esperarThreadTerminar(pthread_t id);
-
+void *rodar_raj(void* flag);
 
 Monitor forno;
-bool should_run_raj = true;
-
+bool raj_rodando = true;
 int quantidadeUsoForno;
+
+int main(int argc, char **argv) {
+    if (argc < 2) {
+        cout << "Necessário passar a quantidade de vezes que um personagem deseja comer." << endl;
+        return 1;
+    }
+
+    quantidadeUsoForno = atoi(argv[1]);
+    
+    pthread_t raj;
+
+    if (pthread_create(&raj, NULL, rodar_raj, &raj_rodando) < 0) {
+        perror("Não foi possível iniciar a thread");
+    }
+    
+    vector<pthread_t> t_ids;
+    for (Personagem p: personagens) {
+        pthread_t res = iniciarThread(p.nome.c_str());
+        t_ids.push_back(res);
+        sleep(1);
+    }
+
+    for (const auto t_id: t_ids) {
+        esperarThreadTerminar(t_id);
+    }
+
+    raj_rodando = false;
+
+    return 0;
+}
 
 pthread_t iniciarThread(const char* personagem) {
     pthread_t thread_id;
@@ -54,42 +83,11 @@ void *iniciarPersonagem(void *nome) {
     return NULL;
 }
 
-void *run_raj(void* flag) {
-    bool should_run_raj = ((bool*) flag);
-    cout << "should_run_raj=" << (should_run_raj ? "true" : "false") << '\n';
-    while (should_run_raj) {
+void *rodar_raj(void* flag) {
+    bool raj_rodando = ((bool*) flag);
+    while (raj_rodando) {
         sleep(5);
         forno.verificar();
     }
     return NULL;
-}
-
-int main(int argc, char **argv) {
-    if (argc < 2) {
-        cout << "Necessário passar a quantidade de vezes que um personagem deseja comer." << endl;
-        return 1;
-    }
-
-    quantidadeUsoForno = atoi(argv[1]);
-    
-    pthread_t raj;
-
-    if (pthread_create(&raj, NULL, run_raj, &should_run_raj) < 0) {
-        perror("Não foi possível iniciar a thread");
-    }
-    
-    vector<pthread_t> t_ids;
-    for (Personagem p: personagens) {
-        pthread_t res = iniciarThread(p.nome.c_str());
-        t_ids.push_back(res);
-        sleep(1);
-    }
-
-    for (const auto t_id: t_ids) {
-        esperarThreadTerminar(t_id);
-    }
-
-    should_run_raj = false;
-
-    return 0;
 }
