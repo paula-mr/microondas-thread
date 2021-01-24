@@ -220,11 +220,11 @@ void Monitor::esperarPorVez(string nome) {
 }
 
 void Monitor::initCond(pthread_cond_t* cond) {
-            if (pthread_cond_init(cond, NULL) != 0) {
-                perror("pthread_cond_init() error");
-                exit(2);
-            }
-        }
+    if (pthread_cond_init(cond, NULL) != 0) {
+        perror("pthread_cond_init() error");
+        exit(2);
+    }
+}
 
 void Monitor::destroyCond(pthread_cond_t* cond) {
     if (pthread_cond_destroy(cond) != 0) {
