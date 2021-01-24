@@ -46,14 +46,10 @@ void Monitor::esperar(Personagem p) {
         exit(2);
     }
 
-    cout << p.nome << " tem o lock --------" << endl; 
-
-    cout << "---- PROXIMO A EXECUTAR " << proximoAExecutar << " TAMANHO LISTA " << lista.size() << endl;
     if (p.deveEsperar(proximoAExecutar, lista.size())) {
         esperarPorVez(p.nome);
     } else {
         proximoAExecutar = p.nome;
-        cout << p.nome << " não precisa esperar " << endl; 
     }
 }
 
@@ -70,9 +66,6 @@ void Monitor::liberar(Personagem p) {
 
     if (proximoAExecutar != "") {
         liberarPersonagem(proximoAExecutar);
-        cout << "---------LIBEROU " << proximoAExecutar << endl;
-    } else {
-        cout << "\n PROXIMO A EXECUTAR = STRING VAZIA---- TAMANHO LISTA " << lista.size() << endl ;
     }
 
 }
@@ -82,18 +75,14 @@ void Monitor::verificar() {
     mt19937 gen(rd()); 
 
     if (!hasDeadLock() || lista.size() == 0 || (hasDeadLock() && proximoAExecutar != "")) return;
-    cout<< "verificou demais\n";
 
     pthread_mutex_lock(&mutexLista);
     uniform_int_distribution<> distr(0, lista.size() - 1);
-    int num = distr(gen) + 1;
     auto it = lista.begin();
-    advance(it, num);
+    advance(it, distr(gen));
     string p = it->first;
     cout << "Raj detectou um deadlock, liberando " << p << endl;
     
-    cout << "Número gerado " << num << " tamanho lista " << lista.size() << endl;
-
     proximoAExecutar = p;
     pthread_mutex_unlock(&mutexLista);
 
@@ -154,7 +143,6 @@ string Monitor::definirProximoAExecutar() {
                 estaPresente(STUART)) {
         return STUART;
     } else {
-        // cout << "DEADLOCK" << endl;
         return "";
     }
 
@@ -206,9 +194,6 @@ bool Monitor::deveExecutarCasalMesmoComCasalMaisPrioritarioNaFila(const string c
 }
 
 void Monitor::liberarPersonagem(string nome) {
-    cout << "mandando sinal de liberado para " << nome << "----------" << endl;
-
-
     if (nome == HOWARD) {
         condSignal(&howardLiberado);
     } else if (nome == BERNADETTE) {
@@ -229,8 +214,6 @@ void Monitor::liberarPersonagem(string nome) {
 }
 
 void Monitor::esperarPorVez(string nome) {
-    cout << nome << " esperando sua vez ----------" << endl;
-
     if (nome == HOWARD) {
         waitCond(&howardLiberado, &mutex);
     } else if (nome == BERNADETTE) {
@@ -248,6 +231,4 @@ void Monitor::esperarPorVez(string nome) {
     } else if (nome == KRIPKE) {
         waitCond(&kripkeLiberado, &mutex);
     }
-
-    cout << nome << " recebeu sinal de liberado ----------" << endl;
 }
