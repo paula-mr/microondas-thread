@@ -4,5 +4,10 @@ Implementar prioridade de casal
 [x] O primeiro do casal a entrar na fila deve executar primeiro entre os dois
 
 [x] Validar se inicialização de variáveis de thread foram feitas com sucesso
-[ ] Implementar Raj (monitor de deadlocks)
+[x] Implementar Raj (monitor de deadlocks)
 [x] Corrigir bug do thread.join matando as threads antes de elas finalizarem
+
+[ ] Organizada no código
+[ ] Verificar se esquecemos de algo que está na documentação
+[ ] Documentar - não esquecer de especificar caso que dá deadlock pro monitor ver
+[ ] Fazer verificação de erro para pthread_mutex_lock e pthread_mutex_unlock
