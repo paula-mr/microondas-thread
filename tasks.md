@@ -10,4 +10,4 @@ Implementar prioridade de casal
 [ ] Organizada no código
 [ ] Verificar se esquecemos de algo que está na documentação
 [ ] Documentar - não esquecer de especificar caso que dá deadlock pro monitor ver
-[ ] Fazer verificação de erro para pthread_mutex_lock e pthread_mutex_unlock
+[x] Fazer verificação de erro para pthread_mutex_lock e pthread_mutex_unlock
