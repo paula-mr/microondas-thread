@@ -9,20 +9,6 @@
 
 using namespace std; 
 
-void waitCond(pthread_cond_t* cond, pthread_mutex_t* mutex) {
-    if (pthread_cond_wait(cond, mutex) != 0) {
-        perror("pthread_cond_wait() error");
-        exit(2);
-    }
-}
-
-void condSignal(pthread_cond_t* cond) {
-    if (pthread_cond_signal(cond) != 0) {
-        perror("pthread_cond_signal() error");
-        exit(2);
-    }
-}
-
 bool Monitor::hasDeadLock() {
     bool hasDeadLockCasais = casalCompleto(LEONARD, PENNY) 
                         && casalCompleto(HOWARD, BERNADETTE)
@@ -37,22 +23,12 @@ bool Monitor::hasDeadLock() {
 
 void Monitor::esperar(Personagem p) {
     cout << p.nome << " quer usar o forno" << endl;
-    if (pthread_mutex_lock(&mutexLista) != 0) {
-        perror("pthread_mutex_lock error");
-        exit(2);
-    }
 
+    mutexLock(&mutexLista);
     lista.insert({p.nome, ordem++});
-    if (pthread_mutex_unlock(&mutexLista) != 0) {
-        perror("pthread_mutex_unlock error");
-        exit(2);
-    }
+    mutexUnlock(&mutexLista);
 
-    if (pthread_mutex_lock(&mutex) != 0) {
-        perror("pthread_mutex_lock error");
-        exit(2);
-    }
-
+    mutexLock(&mutex);
     if (p.deveEsperar(proximoAExecutar, lista.size())) {
         esperarPorVez(p.nome);
     } else {
@@ -64,23 +40,14 @@ void Monitor::liberar(Personagem p) {
     cout << p.nome << " vai comer" << endl;
     ultimoExecutado = p.nome;
 
-    if (pthread_mutex_lock(&mutexLista) != 0) {
-        perror("pthread_mutex_lock error");
-        exit(2);
-    }
+    mutexLock(&mutexLista);
 
     lista.erase(p.nome);
     proximoAExecutar = definirProximoAExecutar();
-    if (pthread_mutex_unlock(&mutexLista) != 0) {
-        perror("pthread_mutex_unlock error");
-        exit(2);
-    }
+    
+    mutexUnlock(&mutexLista);
 
-    if (pthread_mutex_unlock(&mutex) != 0) {
-        perror("pthread_mutex_unlock error");
-        exit(2);
-    }
-
+    mutexUnlock(&mutex);
     if (proximoAExecutar != "") {
         liberarPersonagem(proximoAExecutar);
     }
@@ -93,10 +60,7 @@ void Monitor::verificar() {
 
     if (!hasDeadLock() || lista.size() == 0 || (hasDeadLock() && proximoAExecutar != "")) return;
 
-    if (pthread_mutex_lock(&mutexLista) != 0) {
-        perror("pthread_mutex_lock error");
-        exit(2);
-    }
+    mutexLock(&mutexLista);
     
     uniform_int_distribution<> distr(0, lista.size() - 1);
     auto it = lista.begin();
@@ -105,10 +69,8 @@ void Monitor::verificar() {
     cout << "Raj detectou um deadlock, liberando " << p << endl;
     
     proximoAExecutar = p;
-    if (pthread_mutex_unlock(&mutexLista) != 0) {
-        perror("pthread_mutex_unlock error");
-        exit(2);
-    }
+
+    mutexUnlock(&mutexLista);
 
     liberarPersonagem(p);    
 }
@@ -254,5 +216,61 @@ void Monitor::esperarPorVez(string nome) {
         waitCond(&stuartLiberado, &mutex);
     } else if (nome == KRIPKE) {
         waitCond(&kripkeLiberado, &mutex);
+    }
+}
+
+void Monitor::initCond(pthread_cond_t* cond) {
+            if (pthread_cond_init(cond, NULL) != 0) {
+                perror("pthread_cond_init() error");
+                exit(2);
+            }
+        }
+
+void Monitor::destroyCond(pthread_cond_t* cond) {
+    if (pthread_cond_destroy(cond) != 0) {
+        perror("pthread_cond_destroy() error");
+        exit(2);
+    }
+}
+
+void Monitor::waitCond(pthread_cond_t* cond, pthread_mutex_t* mutex) {
+    if (pthread_cond_wait(cond, mutex) != 0) {
+        perror("pthread_cond_wait() error");
+        exit(2);
+    }
+}
+
+void Monitor::condSignal(pthread_cond_t* cond) {
+    if (pthread_cond_signal(cond) != 0) {
+        perror("pthread_cond_signal() error");
+        exit(2);
+    }
+}
+
+void Monitor::initMutex(pthread_mutex_t* mutex) {
+    if (pthread_mutex_init(mutex, NULL) != 0) {
+        perror("pthread_mutex_init");
+        exit(2);
+    }
+}
+
+void Monitor::destroyMutex(pthread_mutex_t* mutex) {
+    if (pthread_mutex_destroy(mutex) != 0) {
+        perror("pthread_mutex_destroy() error");
+        exit(2);
+    }
+}
+
+void Monitor::mutexLock(pthread_mutex_t* mutex) {
+    if (pthread_mutex_lock(mutex) != 0) {
+        perror("pthread_mutex_lock error");
+        exit(2);
+    }
+}
+
+void Monitor::mutexUnlock(pthread_mutex_t* mutex) {
+    if (pthread_mutex_unlock(mutex) != 0) {
+        perror("pthread_mutex_unlock error");
+        exit(2);
     }
 }
