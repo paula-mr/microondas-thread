@@ -65,6 +65,9 @@ void Monitor::liberar(Personagem p) {
 
     if (proximoAExecutar != "") {
         liberarPersonagem(proximoAExecutar);
+        cout << "---------LIBEROU " << proximoAExecutar << endl;
+    } else {
+        cout << "\n PROXIMO A EXECUTAR = STRING VAZIA----";
     }
 
 }
