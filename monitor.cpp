@@ -37,9 +37,16 @@ bool Monitor::hasDeadLock() {
 
 void Monitor::esperar(Personagem p) {
     cout << p.nome << " quer usar o forno" << endl;
-    pthread_mutex_lock(&mutexLista);
+    if (pthread_mutex_lock(&mutexLista) != 0) {
+        perror("pthread_mutex_lock error");
+        exit(2);
+    }
+
     lista.insert({p.nome, ordem++});
-    pthread_mutex_unlock(&mutexLista);
+    if (pthread_mutex_unlock(&mutexLista) != 0) {
+        perror("pthread_mutex_unlock error");
+        exit(2);
+    }
 
     if (pthread_mutex_lock(&mutex) != 0) {
         perror("pthread_mutex_lock error");
@@ -57,12 +64,22 @@ void Monitor::liberar(Personagem p) {
     cout << p.nome << " vai comer" << endl;
     ultimoExecutado = p.nome;
 
-    pthread_mutex_lock(&mutexLista);
+    if (pthread_mutex_lock(&mutexLista) != 0) {
+        perror("pthread_mutex_lock error");
+        exit(2);
+    }
+
     lista.erase(p.nome);
     proximoAExecutar = definirProximoAExecutar();
-    pthread_mutex_unlock(&mutexLista);
+    if (pthread_mutex_unlock(&mutexLista) != 0) {
+        perror("pthread_mutex_unlock error");
+        exit(2);
+    }
 
-    pthread_mutex_unlock(&mutex);
+    if (pthread_mutex_unlock(&mutex) != 0) {
+        perror("pthread_mutex_unlock error");
+        exit(2);
+    }
 
     if (proximoAExecutar != "") {
         liberarPersonagem(proximoAExecutar);
@@ -76,7 +93,11 @@ void Monitor::verificar() {
 
     if (!hasDeadLock() || lista.size() == 0 || (hasDeadLock() && proximoAExecutar != "")) return;
 
-    pthread_mutex_lock(&mutexLista);
+    if (pthread_mutex_lock(&mutexLista) != 0) {
+        perror("pthread_mutex_lock error");
+        exit(2);
+    }
+    
     uniform_int_distribution<> distr(0, lista.size() - 1);
     auto it = lista.begin();
     advance(it, distr(gen));
@@ -84,7 +105,10 @@ void Monitor::verificar() {
     cout << "Raj detectou um deadlock, liberando " << p << endl;
     
     proximoAExecutar = p;
-    pthread_mutex_unlock(&mutexLista);
+    if (pthread_mutex_unlock(&mutexLista) != 0) {
+        perror("pthread_mutex_unlock error");
+        exit(2);
+    }
 
     liberarPersonagem(p);    
 }
