@@ -29,7 +29,6 @@ class Monitor {
 
         pthread_mutex_t mutex;
         pthread_mutex_t mutexLista;
-        pthread_attr_t attr;
 
         pthread_cond_t sheldonLiberado;
         pthread_cond_t amyLiberada;
@@ -49,10 +48,6 @@ class Monitor {
                 perror("pthread_mutexLista_init");
                 exit(2);
             }
-            if (pthread_attr_init(&attr) != 0) {
-                perror("pthread_attr_init()");
-                exit(2);
-            }
             initCond(&sheldonLiberado);
             initCond(&amyLiberada);
             initCond(&howardLiberado);
@@ -66,10 +61,6 @@ class Monitor {
         }
 
         ~Monitor() {
-            if (pthread_attr_destroy(&attr) != 0) {
-                perror("pthread_attr_destroy() error");
-                exit(2);
-            }
             if (pthread_mutex_destroy(&mutex) != 0) {
                 perror("pthread_mutex_destroy() error");
                 exit(2);
