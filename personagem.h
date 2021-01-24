@@ -25,10 +25,10 @@ class Personagem {
 
 const Personagem personagens[] = {
                                     Personagem((char*) "Kripke"), 
-                                    Personagem((char*) "Stuart"),
                                     Personagem((char*) "Sheldon"),
                                     Personagem((char*) "Howard"),
                                     Personagem((char*) "Penny"), 
+                                    Personagem((char*) "Stuart"),
                                     Personagem((char*) "Leonard"), 
                                     Personagem((char*) "Amy"), 
                                     Personagem((char*) "Bernadette")

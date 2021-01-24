@@ -46,8 +46,14 @@ void Monitor::esperar(Personagem p) {
         exit(2);
     }
 
+    cout << p.nome << " tem o lock --------" << endl; 
+
+    cout << "---- PROXIMO A EXECUTAR " << proximoAExecutar << " TAMANHO LISTA " << lista.size() << endl;
     if (p.deveEsperar(proximoAExecutar, lista.size())) {
         esperarPorVez(p.nome);
+    } else {
+        proximoAExecutar = p.nome;
+        cout << p.nome << " não precisa esperar " << endl; 
     }
 }
 
@@ -57,17 +63,16 @@ void Monitor::liberar(Personagem p) {
 
     pthread_mutex_lock(&mutexLista);
     lista.erase(p.nome);
+    proximoAExecutar = definirProximoAExecutar();
     pthread_mutex_unlock(&mutexLista);
 
-    pthread_mutex_unlock(&this->mutex);
-
-    proximoAExecutar = definirProximoAExecutar();
+    pthread_mutex_unlock(&mutex);
 
     if (proximoAExecutar != "") {
         liberarPersonagem(proximoAExecutar);
         cout << "---------LIBEROU " << proximoAExecutar << endl;
     } else {
-        cout << "\n PROXIMO A EXECUTAR = STRING VAZIA----";
+        cout << "\n PROXIMO A EXECUTAR = STRING VAZIA---- TAMANHO LISTA " << lista.size() << endl ;
     }
 
 }
@@ -76,31 +81,42 @@ void Monitor::verificar() {
     random_device rd; 
     mt19937 gen(rd()); 
 
-    if (!hasDeadLock() || lista.size() == 0) return;
+    if (!hasDeadLock() || lista.size() == 0 || (hasDeadLock() && proximoAExecutar != "")) return;
     cout<< "verificou demais\n";
 
+    pthread_mutex_lock(&mutexLista);
     uniform_int_distribution<> distr(0, lista.size() - 1);
+    int num = distr(gen) + 1;
     auto it = lista.begin();
-    advance(it, distr(gen) + 1);
+    advance(it, num);
     string p = it->first;
     cout << "Raj detectou um deadlock, liberando " << p << endl;
+    
+    cout << "Número gerado " << num << " tamanho lista " << lista.size() << endl;
+
+    proximoAExecutar = p;
+    pthread_mutex_unlock(&mutexLista);
+
     liberarPersonagem(p);    
 }
 
 string Monitor::definirProximoAExecutar() {
-    if (deveExecutarCasal(SHELDON, AMY) && !deveExecutarCasal(LEONARD, PENNY)) {
+    if (deveExecutarCasal(SHELDON, AMY) && 
+    (!deveExecutarCasal(LEONARD, PENNY) || deveExecutarCasalMesmoComCasalMaisPrioritarioNaFila(SHELDON, AMY))) {
         if (encontrarPrimeiro(SHELDON, AMY) == SHELDON) {
             return SHELDON;
         } else {
             return AMY;
         }
-    } else if (deveExecutarCasal(LEONARD, PENNY) && !deveExecutarCasal(HOWARD, BERNADETTE)) {
+    } else if (deveExecutarCasal(LEONARD, PENNY) && 
+    (!deveExecutarCasal(HOWARD, BERNADETTE) || deveExecutarCasalMesmoComCasalMaisPrioritarioNaFila(LEONARD, PENNY))) {
         if (encontrarPrimeiro(LEONARD, PENNY) == LEONARD) {
             return LEONARD;
         } else {
             return PENNY;
         }
-    } else if (deveExecutarCasal(HOWARD, BERNADETTE) && !deveExecutarCasal(SHELDON, AMY)) {
+    } else if (deveExecutarCasal(HOWARD, BERNADETTE) && 
+    (!deveExecutarCasal(SHELDON, AMY) || deveExecutarCasalMesmoComCasalMaisPrioritarioNaFila(HOWARD, BERNADETTE))) {
         if (encontrarPrimeiro(HOWARD, BERNADETTE) == HOWARD) {
             return HOWARD;
         } else {
@@ -173,7 +189,26 @@ bool Monitor::deveExecutarCasal(const string c1, const string c2) {
     return ambosNaFila || umFilaOutroAcabouDeSerExecutado;
 }
 
+bool Monitor::deveExecutarCasalMesmoComCasalMaisPrioritarioNaFila(const string c1, const string c2) {
+    bool umFilaOutroAcabouDeSerExecutado = ((estaPresente(c1) && ultimoExecutado == c2) ||
+        (estaPresente(c2) && ultimoExecutado == c1));
+
+    bool outrosDoisCasaisEstaoNaFila = false;
+    if (c1 == HOWARD || c1 == BERNADETTE) {
+        outrosDoisCasaisEstaoNaFila = casalCompleto(SHELDON, AMY) && casalCompleto(LEONARD, PENNY);
+    } else if (c1 == LEONARD || c1 == PENNY) {
+        outrosDoisCasaisEstaoNaFila = casalCompleto(SHELDON, AMY) && casalCompleto(HOWARD, BERNADETTE);
+    } else if (c1 == SHELDON || c1 == AMY) {
+        outrosDoisCasaisEstaoNaFila = casalCompleto(HOWARD, BERNADETTE) && casalCompleto(LEONARD, PENNY);
+    }
+
+    return umFilaOutroAcabouDeSerExecutado && outrosDoisCasaisEstaoNaFila;
+}
+
 void Monitor::liberarPersonagem(string nome) {
+    cout << "mandando sinal de liberado para " << nome << "----------" << endl;
+
+
     if (nome == HOWARD) {
         condSignal(&howardLiberado);
     } else if (nome == BERNADETTE) {
@@ -194,6 +229,8 @@ void Monitor::liberarPersonagem(string nome) {
 }
 
 void Monitor::esperarPorVez(string nome) {
+    cout << nome << " esperando sua vez ----------" << endl;
+
     if (nome == HOWARD) {
         waitCond(&howardLiberado, &mutex);
     } else if (nome == BERNADETTE) {
@@ -211,4 +248,6 @@ void Monitor::esperarPorVez(string nome) {
     } else if (nome == KRIPKE) {
         waitCond(&kripkeLiberado, &mutex);
     }
+
+    cout << nome << " recebeu sinal de liberado ----------" << endl;
 }

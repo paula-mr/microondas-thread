@@ -86,6 +86,7 @@ class Monitor {
         bool estaPresente(string personagem);
         string encontrarPrimeiro(string p1, string p2);
         bool deveExecutarCasal(const string c1, const string c2);
+        bool deveExecutarCasalMesmoComCasalMaisPrioritarioNaFila(const string c1, const string c2);
         bool casalCompleto(string p1, string p2);
         void liberarPersonagem(string nome);
         void esperarPorVez(string nome);
